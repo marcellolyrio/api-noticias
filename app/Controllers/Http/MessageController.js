@@ -20,7 +20,8 @@ class MessageController {
    * @param {View} ctx.view
    */
   async index ({ request, response, view }) {
-    const messages = Message.all()
+    const messages = await Message.query().with('user').fetch();
+
 
     return messages
   }
@@ -33,14 +34,13 @@ class MessageController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store ({auth, request, response }) {
-    const { id } = auth.user
+  async store ({auth, request}) {
     const data = request.only([
       'title',
       'message'      
     ])
   
-    const message = await Message.create({ ...data, user_id: id })
+    const message = await Message.create({ ...data, user_id: auth.user.id })
   
     return message
   }
@@ -54,7 +54,7 @@ class MessageController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async show ({ params, request, response, view }) {
+  async show ({ params }) {
     const message = await Message.findOrFail(params.id)
 
     return message
@@ -91,11 +91,11 @@ class MessageController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async destroy ({ auth, params, request, response }) {
-    const { id } = auth.user
+  async destroy ({ auth, params, response }) {
+   
     const message = await Message.findOrFail(params.id)
 
-    if (message.user_id !== id) {
+    if (message.user_id !== auth.user.id) {
       return response.status(401).send({ error: 'Not authorized' })
     }else{
       await message.delete()
