@@ -6,17 +6,18 @@ const Schema = use('Schema')
 class MessageSchema extends Schema {
   up () {
     this.create('messages', (table) => {
-      table.increments()
+      table.increments();
       table
         .integer('user_id')
         .unsigned()
+        .notNullable()
         .references('id')
         .inTable('users')
         .onUpdate('CASCADE')
-        .onDelete('CASCADE')
-      table.string('title').notNullable()
-      table.string('message').notNullable()
-      table.timestamps()
+        .onDelete('CASCADE');
+      table.string('title').notNullable();
+      table.string('message').notNullable();
+      table.timestamps();
     })
   }
 
